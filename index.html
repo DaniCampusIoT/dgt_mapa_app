@@ -215,7 +215,9 @@
         // =========================
         // Config
         // =========================
-        const API_BASE = "http://localhost:8080";
+        const API_BASE = (location.hostname === "127.0.0.1" || location.hostname === "localhost")
+        ? "http://localhost:8080"
+        : "";
         const REFRESH_MS = 60000;
         const FETCH_TIMEOUT_MS = 9000;
 
