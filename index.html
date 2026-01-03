@@ -313,7 +313,7 @@
             const controller = new AbortController();
             const t = setTimeout(() => controller.abort(), ms);
             return { controller, cancelTimeout: () => clearTimeout(t) };
-        } // AbortController cancels fetch [web:261]
+        } // AbortController cancels fetch 
 
         function scheduleNextTick() {
             if (refreshTimer) clearTimeout(refreshTimer);
