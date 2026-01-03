@@ -1,695 +1,734 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DGT (proxy Go) - Incidencias</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DGT (proxy Go) - Incidencias</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- MarkerCluster plugin (mejora claridad/rendimiento con muchos markers) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <!-- MarkerCluster plugin -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-
-        #panel {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.96);
-            padding: 12px;
-            border-radius: 12px;
-            box-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
-            min-width: 340px;
-            max-width: 380px;
-            backdrop-filter: blur(4px);
-        }
-
-        #status {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.96);
-            padding: 10px 12px;
-            border-radius: 12px;
-            box-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(4px);
-        }
-
-        h3 {
-            margin: 0 0 8px 0;
-        }
-
-        .row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-            align-items: center;
-        }
-
-        .row>* {
-            flex: 0 0 auto;
-        }
-
-        button {
-            cursor: pointer;
-            border: 1px solid #ddd;
-            background: #fff;
-            border-radius: 10px;
-            padding: 7px 10px;
-        }
-
-        button:hover {
-            background: #f7f7f7;
-        }
-
-        .muted {
-            color: #666;
-            font-size: 12px;
-            line-height: 1.3;
-        }
-
-        .kpi {
-            font-size: 13px;
-            margin-top: 6px;
-        }
-
-        .badge {
-            display: inline-block;
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 999px;
-            background: #f2f2f2;
-            margin-right: 6px;
-        }
-
-        .badge.ok {
-            background: #e8f7ee;
-            color: #136f2d;
-        }
-
-        .badge.err {
-            background: #ffecec;
-            color: #9b1c1c;
-        }
-
-        .badge.warn {
-            background: #fff5e6;
-            color: #8a4b00;
-        }
-
-        label {
-            font-size: 12px;
-            color: #222;
-        }
-
-        select,
-        input[type="checkbox"] {
-            cursor: pointer;
-        }
-
-        .filters {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .filters>div {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        select {
-            width: 100%;
-            padding: 6px 8px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            background: white;
-            font-size: 12px;
-        }
-
-        .toggles {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-
-        .toggles label {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            user-select: none;
-        }
-
-        code {
-            font-size: 12px;
-        }
-    </style>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #map { height: 100vh; width: 100%; }
+    #panel {
+      position: absolute; top: 10px; left: 10px; z-index: 1000;
+      background: rgba(255, 255, 255, 0.96);
+      padding: 12px; border-radius: 12px;
+      box-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+      min-width: 340px; max-width: 380px;
+      backdrop-filter: blur(4px);
+    }
+    #status {
+      position: absolute; top: 10px; right: 10px; z-index: 1000;
+      background: rgba(255, 255, 255, 0.96);
+      padding: 10px 12px; border-radius: 12px;
+      box-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(4px);
+    }
+    h3 { margin: 0 0 8px 0; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+    .row > * { flex: 0 0 auto; }
+    button { cursor: pointer; border: 1px solid #ddd; background: #fff; border-radius: 10px; padding: 7px 10px; }
+    button:hover { background: #f7f7f7; }
+    .muted { color: #666; font-size: 12px; line-height: 1.3; }
+    .kpi { font-size: 13px; margin-top: 6px; }
+    .badge { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #f2f2f2; margin-right: 6px; }
+    .badge.ok { background: #e8f7ee; color: #136f2d; }
+    .badge.err { background: #ffecec; color: #9b1c1c; }
+    .badge.warn { background: #fff5e6; color: #8a4b00; }
+    label { font-size: 12px; color: #222; }
+    select, input[type="checkbox"] { cursor: pointer; }
+    .filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .filters > div { display: flex; flex-direction: column; gap: 4px; }
+    select {
+      width: 100%; padding: 6px 8px; border-radius: 10px;
+      border: 1px solid #ddd; background: white; font-size: 12px;
+    }
+    .toggles { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .toggles label { display: flex; gap: 6px; align-items: center; user-select: none; }
+    code { font-size: 12px; }
+  </style>
 </head>
 
 <body>
-    <div id="map"></div>
+  <div id="map"></div>
 
-    <div id="panel">
-        <h3>Incidencias DGT</h3>
+  <div id="panel">
+    <h3>Incidencias DGT</h3>
 
-        <div class="kpi" id="count">Cargando…</div>
-        <div class="muted">
-            <span class="badge">Líneas</span> tramo/zona (GeoJSON) &nbsp;
-            <span class="badge">Baliza</span> icono/clúster en el centro
-        </div>
-
-        <div class="filters">
-            <div>
-                <label for="causaSelect">Causa</label>
-                <select id="causaSelect"></select>
-            </div>
-            <div>
-                <label for="subcausaSelect">Subcausa</label>
-                <select id="subcausaSelect"></select>
-            </div>
-        </div>
-
-        <div class="toggles">
-            <label><input id="toggleBalizas" type="checkbox" checked /> Balizas</label>
-            <label><input id="toggleLineas" type="checkbox" checked /> Líneas</label>
-            <label><input id="toggleAutoZoom" type="checkbox" checked /> Auto-zoom</label>
-            <label><input id="toggleCluster" type="checkbox" checked /> Clustering</label>
-        </div>
-
-        <div class="row">
-            <button id="btnRefresh">Actualizar ahora</button>
-            <button id="btnResetFilters">Reset filtros</button>
-        </div>
-
-        <div class="muted" style="margin-top:10px;">
-            Origen API: <code id="apiBase"></code>
-        </div>
+    <div class="kpi" id="count">Cargando…</div>
+    <div class="muted">
+      <span class="badge">Líneas</span> tramo/zona (GeoJSON) &nbsp;
+      <span class="badge">Baliza</span> icono/clúster en el centro
     </div>
 
-    <div id="status">
-        <div>Estado: <span id="health" class="badge warn">Cargando…</span></div>
-        <div>Última actualización: <span id="lastUpdate">-</span></div>
+    <div class="filters">
+      <div>
+        <label for="causaSelect">Causa</label>
+        <select id="causaSelect"></select>
+      </div>
+      <div>
+        <label for="subcausaSelect">Subcausa</label>
+        <select id="subcausaSelect"></select>
+      </div>
     </div>
 
-    <script>
-        // =========================
-        // Config
-        // =========================
-        const API_BASE = (location.hostname === "127.0.0.1" || location.hostname === "localhost")
-        ? "http://localhost:8080"
-        : "";
-        const REFRESH_MS = 60000;
-        const FETCH_TIMEOUT_MS = 9000;
+    <div class="toggles">
+      <label><input id="toggleBalizas" type="checkbox" checked /> Balizas</label>
+      <label><input id="toggleLineas" type="checkbox" checked /> Líneas</label>
+      <label><input id="toggleAutoZoom" type="checkbox" checked /> Auto-zoom</label>
+      <label><input id="toggleCluster" type="checkbox" checked /> Clustering</label>
+    </div>
 
-        document.getElementById("apiBase").textContent = API_BASE;
+    <div class="row">
+      <button id="btnRefresh">Actualizar ahora</button>
+      <button id="btnResetFilters">Reset filtros</button>
+    </div>
 
-        let refreshTimer = null;
-        let currentInterval = REFRESH_MS;
+    <div class="muted" style="margin-top:10px;">
+      Origen API: <code id="apiBase"></code>
+    </div>
+  </div>
 
-        // =========================
-        // Map init
-        // =========================
-        const map = L.map("map").setView([40.4168, -3.7038], 6);
+  <div id="status">
+    <div>Estado: <span id="health" class="badge warn">Cargando…</span></div>
+    <div>Última actualización: <span id="lastUpdate">-</span></div>
+  </div>
 
-        // Mapa base
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            updateWhenZooming: false,
-            updateWhenIdle: true
-        }).addTo(map);
+  <script>
+  // =========================
+  // Config
+  // =========================
+  const API_BASE = (location.hostname === "127.0.0.1" || location.hostname === "localhost")
+    ? "http://localhost:8080"
+    : "";
 
-        // Icono baliza (PNG)
-        const balizaIcon = L.icon({
-            iconUrl: "imgs/flashled-sos-v16.png",
-            iconSize: [42, 42],
-            iconAnchor: [21, 21],
-            popupAnchor: [0, -18]
-        });
+  const REFRESH_MS = 60000;
+  const FETCH_TIMEOUT_MS = 9000;
 
-        // Capa de líneas/zona (GeoJSON)
-        const geoLayer = L.geoJSON([], {
-            // evita pines azules si llega Point: dibuja circleMarker
-            pointToLayer: (feature, latlng) => {
-                return L.circleMarker(latlng, {
-                    radius: 5, color: "#111", weight: 2,
-                    fillColor: "#ff7a00", fillOpacity: 0.9
-                });
-            },
-            style: (feature) => {
-                const causa = (feature?.properties?.causa || "").toLowerCase();
-                let color = "#ff7a00";
-                if (causa.includes("accidente")) color = "#d90429";
-                if (causa.includes("obras")) color = "#2a9d8f";
-                if (causa.includes("meteor")) color = "#457b9d";
-                return { color, weight: 5, opacity: 0.85 };
-            },
-            onEachFeature: (feature, layer) => {
-                const props = feature?.properties || {};
-                layer.bindPopup(popupHtml(props));
-                layer.on("mouseover", () => {
-                    // highlight (UX)
-                    if (layer.setStyle) layer.setStyle({ weight: 8, opacity: 1.0 });
-                });
-                layer.on("mouseout", () => {
-                    // reset style: re-aplica style() con el feature
-                    if (layer.setStyle) layer.setStyle(geoLayer.options.style(feature));
-                });
-            }
-        });
+  // 30 min: baliza "reciente"
+  const BEACON_TTL_MS = 30 * 60 * 1000;
 
-        // Balizas: con clustering opcional
-        const clusterLayer = L.markerClusterGroup({
-            chunkedLoading: true,
-            disableClusteringAtZoom: 12,
-            spiderfyOnMaxZoom: false,
-            showCoverageOnHover: false,
-            removeOutsideVisibleBounds: true
-        });
+  document.getElementById("apiBase").textContent = API_BASE;
 
+  let refreshTimer = null;
+  let currentInterval = REFRESH_MS;
 
-        const plainMarkerLayer = L.layerGroup();
+  // =========================
+  // Map init
+  // =========================
+  const map = L.map("map").setView([40.4168, -3.7038], 6);
 
-        // Visibilidad (toggles)
-        let state = {
-            autoZoom: true,
-            showBalizas: true,
-            showLineas: true,
-            useCluster: true,
-            causa: "__ALL__",
-            subcausa: "__ALL__"
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    updateWhenZooming: false,
+    updateWhenIdle: true
+  }).addTo(map);
+
+  // =========================
+  // Icons
+  // =========================
+  // Iconos baliza: ON (activa) / OFF (reciente)
+  const balizaOnIcon = L.icon({
+    iconUrl: "imgs/flashled-sos-v16-on.png",
+    iconSize: [42, 42],
+    iconAnchor: [21, 21],
+    popupAnchor: [0, -18]
+  });
+
+  const balizaOffIcon = L.icon({
+    iconUrl: "imgs/flashled-sos-v16-off.png",
+    iconSize: [42, 42],
+    iconAnchor: [21, 21],
+    popupAnchor: [0, -18]
+  });
+
+  // --- Iconos por subcausa (carpeta renombrada a imgs/signal/) ---
+  const SUBCAUSE_ICON_FILE = {
+    "actividades": "01_actividades.png",
+    "congestión": "02_congestion.png",
+    "congestion": "02_congestion.png",
+    "daños en la vía": "03_danos_via.png",
+    "danos en la via": "03_danos_via.png",
+    "desprendimientos": "04_desprendimientos.png",
+    "hielo": "05_hielo.png",
+    "lluvia": "06_lluvia.png",
+    "mercancías peligrosas": "07_merc_peligrosas.png",
+    "mercancias peligrosas": "07_merc_peligrosas.png",
+    "nevada": "08_nevada.png",
+    "niebla": "09_niebla.png",
+    "obra": "10_obra.png",
+    "regulación especial": "11_regulacion_especial.png",
+    "regulacion especial": "11_regulacion_especial.png",
+    "vertido en carretera": "12_vertido_carretera.png"
+  };
+
+  const ICON_CACHE = new Map();
+
+  function normalize(v) { return (v ?? "").toString().trim(); }
+  function norm(s) { return (s ?? "").toString().trim().toLowerCase(); }
+
+  function iconForSubcausa(subcausaRaw) {
+    const key = norm(subcausaRaw);
+    const file = SUBCAUSE_ICON_FILE[key] || null;
+    if (!file) return null;
+
+    const url = `imgs/signal/${file}`;
+    if (ICON_CACHE.has(url)) return ICON_CACHE.get(url);
+
+    // Ancla como los de baliza para que “pise” igual en el mapa
+    const icon = L.icon({
+      iconUrl: url,
+      iconSize: [42, 42],
+      iconAnchor: [21, 21],
+      popupAnchor: [0, -18]
+    });
+
+    ICON_CACHE.set(url, icon);
+    return icon;
+  }
+
+  // =========================
+  // Capa de líneas/zona (GeoJSON)
+  // =========================
+  const geoLayer = L.geoJSON([], {
+    pointToLayer: (feature, latlng) => {
+      return L.circleMarker(latlng, {
+        radius: 5, color: "#111", weight: 2,
+        fillColor: "#ff7a00", fillOpacity: 0.9
+      });
+    },
+    style: (feature) => {
+      const causa = (feature?.properties?.causa || "").toLowerCase();
+      let color = "#ff7a00";
+      if (causa.includes("accidente")) color = "#d90429";
+      if (causa.includes("obras")) color = "#2a9d8f";
+      if (causa.includes("meteor")) color = "#457b9d";
+      return { color, weight: 5, opacity: 0.85 };
+    },
+    onEachFeature: (feature, layer) => {
+      const props = feature?.properties || {};
+      layer.bindPopup(popupHtml(props));
+      layer.on("mouseover", () => { if (layer.setStyle) layer.setStyle({ weight: 8, opacity: 1.0 }); });
+      layer.on("mouseout", () => { if (layer.setStyle) layer.setStyle(geoLayer.options.style(feature)); });
+    }
+  });
+
+  // --- Balizas activas (si el filtro es de coche, se ven siempre) ---
+  const clusterActiveLayer = L.markerClusterGroup({
+    chunkedLoading: true,
+    disableClusteringAtZoom: 12,
+    spiderfyOnMaxZoom: false,
+    showCoverageOnHover: false,
+    removeOutsideVisibleBounds: true
+  });
+  const plainActiveLayer = L.layerGroup();
+
+  // --- Balizas recientes (controladas por toggle Balizas) ---
+  const clusterRecentLayer = L.markerClusterGroup({
+    chunkedLoading: true,
+    disableClusteringAtZoom: 12,
+    spiderfyOnMaxZoom: false,
+    showCoverageOnHover: false,
+    removeOutsideVisibleBounds: true
+  });
+  const plainRecentLayer = L.layerGroup();
+
+  // --- Otros puntos (no-coche): sin cluster ---
+  const otherPointsLayer = L.layerGroup();
+
+  let state = {
+    autoZoom: true,
+    showBalizas: true,      // ahora controla "recientes"
+    showLineas: true,
+    useCluster: true,
+    causa: "__ALL__",
+    subcausa: "__ALL__",
+    showRecent: true
+  };
+
+  geoLayer.addTo(map);
+
+  // =========================
+  // Networking
+  // =========================
+  let inFlightController = null;
+  let lastDataFingerprint = null;
+
+  function withTimeoutController(ms) {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), ms);
+    return { controller, cancelTimeout: () => clearTimeout(t) };
+  }
+
+  function scheduleNextTick() {
+    if (refreshTimer) clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => updateData(false), currentInterval);
+  }
+
+  function setBackoff(onError) {
+    currentInterval = onError ? Math.min(currentInterval * 2, 300000) : REFRESH_MS;
+  }
+
+  async function fetchTrafficSafe() {
+    if (inFlightController) inFlightController.abort();
+
+    const { controller, cancelTimeout } = withTimeoutController(FETCH_TIMEOUT_MS);
+    inFlightController = controller;
+
+    try {
+      const r = await fetch(`${API_BASE}/api/traffic`, { method: "GET", signal: controller.signal, cache: "no-store" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.json();
+    } finally {
+      cancelTimeout();
+      inFlightController = null;
+    }
+  }
+
+  // =========================
+  // UI Helpers
+  // =========================
+  function setHealthBadge(type, text) {
+    const el = document.getElementById("health");
+    el.textContent = text;
+    el.className = "badge " + type;
+  }
+
+  function popupHtml(r) {
+    const estado = r.__balizaEstado ? `<br>Estado: <b>${r.__balizaEstado}</b>` : "";
+    return `
+      <b>Incidencia</b><br>
+      ID: ${r.id ?? "N/D"}<br>
+      Carretera: ${r.carretera ?? "N/D"}<br>
+      Provincia: ${r.provinciaIni ?? "N/D"} - ${r.provinciaFin ?? "N/D"}<br>
+      Causa: ${r.causa ?? "N/D"}<br>
+      Subcausa: ${r.subcausa ?? "N/D"}<br>
+      Inicio: ${r.fechaInicio ? new Date(r.fechaInicio).toLocaleString("es-ES") : "N/D"}
+      ${estado}
+    `;
+  }
+
+  function fingerprintRecords(records) {
+    let maxDate = "";
+    let ids = "";
+    const n = records.length;
+    for (let i = 0; i < n; i++) {
+      const r = records[i] || {};
+      ids += (r.id || "") + "|";
+      const fi = r.fechaInicio || "";
+      if (fi > maxDate) maxDate = fi;
+    }
+    return `${n}:${maxDate}:${ids.length}:${ids.slice(0, 200)}`;
+  }
+
+  // =========================
+  // Baliza "solo coche"
+  // =========================
+  function isCarIncident(r) {
+    const causa = norm(r?.causa);
+    const sub = norm(r?.subcausa);
+
+    if (causa === "accidente") return true;
+
+    const VEHICLE_SUBCAUSES = new Set([
+      "vehículo detenido", "vehiculo detenido",
+      "vehículo ardiendo", "vehiculo ardiendo",
+      "otros obstáculos", "otros obstaculos"
+    ]);
+
+    return VEHICLE_SUBCAUSES.has(sub);
+  }
+
+  // Si el filtro seleccionado es "de coche", se fuerzan balizas activas visibles
+  function isCarFilterSelected() {
+    const sub = norm(state.subcausa);
+    if (sub && sub !== "__all__") {
+      const VEHICLE_SUBCAUSES = new Set([
+        "vehículo detenido", "vehiculo detenido",
+        "vehículo ardiendo", "vehiculo ardiendo",
+        "otros obstáculos", "otros obstaculos"
+      ]);
+      if (VEHICLE_SUBCAUSES.has(sub)) return true;
+    }
+
+    const causa = norm(state.causa);
+    if (causa && causa !== "__all__" && causa === "accidente") return true;
+
+    return false;
+  }
+
+  // =========================
+  // Geometría / ubicación
+  // =========================
+  function flattenLineCoords(geom) {
+    if (!geom) return [];
+    if (geom.type === "LineString") return geom.coordinates || [];
+    if (geom.type === "MultiLineString") return (geom.coordinates || []).flat();
+    return [];
+  }
+
+  function segMeters(a, b) {
+    const A = L.latLng(a[1], a[0]);
+    const B = L.latLng(b[1], b[0]);
+    return A.distanceTo(B);
+  }
+
+  function midpointAlongLine(geom) {
+    const pts = flattenLineCoords(geom);
+    if (pts.length === 0) return null;
+    if (pts.length === 1) return [pts[0][1], pts[0][0]];
+
+    let total = 0;
+    for (let i = 0; i < pts.length - 1; i++) total += segMeters(pts[i], pts[i + 1]);
+    if (total === 0) return [pts[0][1], pts[0][0]];
+
+    const half = total / 2;
+    let acc = 0;
+
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1];
+      const d = segMeters(a, b);
+      if (acc + d >= half) {
+        const t = (half - acc) / d;
+        const lon = a[0] + (b[0] - a[0]) * t;
+        const lat = a[1] + (b[1] - a[1]) * t;
+        return [lat, lon];
+      }
+      acc += d;
+    }
+    const last = pts[pts.length - 1];
+    return [last[1], last[0]];
+  }
+
+  function fallbackCenter(geom) {
+    if (!geom || !geom.type || !geom.coordinates) return null;
+
+    let points = [];
+    if (geom.type === "Point") points = [geom.coordinates];
+    else if (geom.type === "MultiPoint") points = geom.coordinates;
+    else if (geom.type === "Polygon") points = geom.coordinates?.[0] || [];
+    else if (geom.type === "MultiPolygon") points = geom.coordinates?.[0]?.[0] || [];
+
+    if (!points.length) return null;
+
+    let sumLon = 0, sumLat = 0;
+    for (const p of points) { sumLon += p[0]; sumLat += p[1]; }
+    return [sumLat / points.length, sumLon / points.length];
+  }
+
+  function bestBalizaPosition(geom) {
+    if (geom?.type === "LineString" || geom?.type === "MultiLineString") return midpointAlongLine(geom);
+    return fallbackCenter(geom);
+  }
+
+  // =========================
+  // Beacon cache (estado activa/reciente)
+  // =========================
+  // id -> { record, center:[lat,lon], lastSeenMs }
+  const beaconCache = new Map();
+
+  function purgeExpiredBeacons(nowMs) {
+    for (const [id, v] of beaconCache.entries()) {
+      if ((nowMs - v.lastSeenMs) > BEACON_TTL_MS) beaconCache.delete(id);
+    }
+  }
+
+  // =========================
+  // Filtering / layers
+  // =========================
+  function buildSelectOptions(selectEl, values, allLabel) {
+    selectEl.innerHTML = "";
+    const optAll = document.createElement("option");
+    optAll.value = "__ALL__";
+    optAll.textContent = allLabel;
+    selectEl.appendChild(optAll);
+
+    values.sort((a, b) => a.localeCompare(b, "es")).forEach(v => {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v;
+      selectEl.appendChild(o);
+    });
+  }
+
+  function applyLayerVisibility() {
+    // líneas
+    if (state.showLineas) {
+      if (!map.hasLayer(geoLayer)) geoLayer.addTo(map);
+    } else {
+      if (map.hasLayer(geoLayer)) map.removeLayer(geoLayer);
+    }
+
+    // --- BALIZAS ACTIVAS (forzadas si filtro de coche) ---
+    const activeLayer = state.useCluster ? clusterActiveLayer : plainActiveLayer;
+
+    if (map.hasLayer(clusterActiveLayer)) map.removeLayer(clusterActiveLayer);
+    if (map.hasLayer(plainActiveLayer)) map.removeLayer(plainActiveLayer);
+
+    if (isCarFilterSelected()) activeLayer.addTo(map);
+
+    // --- BALIZAS RECIENTES (toggle "Balizas") ---
+    const recentLayer = state.useCluster ? clusterRecentLayer : plainRecentLayer;
+
+    if (map.hasLayer(clusterRecentLayer)) map.removeLayer(clusterRecentLayer);
+    if (map.hasLayer(plainRecentLayer)) map.removeLayer(plainRecentLayer);
+
+    if (state.showBalizas && state.showRecent) recentLayer.addTo(map);
+
+    // --- OTROS PUNTOS (no-coche) ---
+    // Conserva el comportamiento: visibles solo cuando "Balizas" está OFF
+    if (state.showBalizas) {
+      if (map.hasLayer(otherPointsLayer)) map.removeLayer(otherPointsLayer);
+    } else {
+      if (!map.hasLayer(otherPointsLayer)) otherPointsLayer.addTo(map);
+    }
+  }
+
+  function filtered(records) {
+    const causaSel = state.causa;
+    const subSel = state.subcausa;
+
+    return records.filter(r => {
+      if (!r) return false;
+      const c = normalize(r.causa);
+      const s = normalize(r.subcausa);
+      if (causaSel !== "__ALL__" && c !== causaSel) return false;
+      if (subSel !== "__ALL__" && s !== subSel) return false;
+      return true;
+    });
+  }
+
+  // =========================
+  // Render
+  // =========================
+  function clearDataLayers() {
+    geoLayer.clearLayers();
+    otherPointsLayer.clearLayers();
+
+    clusterActiveLayer.clearLayers();
+    plainActiveLayer.clearLayers();
+
+    clusterRecentLayer.clearLayers();
+    plainRecentLayer.clearLayers();
+  }
+
+  function addBalizaMarkerAt(latlng, props, estado) {
+    const icon = (estado === "activa") ? balizaOnIcon : balizaOffIcon;
+    const enriched = { ...props, __balizaEstado: estado };
+    const m = L.marker(latlng, { icon }).bindPopup(popupHtml(enriched));
+
+    if (estado === "activa") {
+      if (state.useCluster) clusterActiveLayer.addLayer(m);
+      else plainActiveLayer.addLayer(m);
+    } else {
+      if (state.useCluster) clusterRecentLayer.addLayer(m);
+      else plainRecentLayer.addLayer(m);
+    }
+  }
+
+  function addSubcauseMarkerAt(latlng, props) {
+    // Icono por subcausa (si no hay, marker default)
+    const ic = iconForSubcausa(props?.subcausa);
+    const m = ic ? L.marker(latlng, { icon: ic }) : L.marker(latlng);
+    m.bindPopup(popupHtml(props));
+    otherPointsLayer.addLayer(m);
+  }
+
+  function updateMap(records, nowMs) {
+    clearDataLayers();
+
+    let drawn = 0;
+    let balizasActivas = 0;
+    let balizasRecientes = 0;
+
+    const activeBeaconIds = new Set();
+
+    // 1) Render de lo actual (y cache)
+    for (const r of records) {
+      if (!r || !r.geometria) continue;
+
+      try {
+        const geom = JSON.parse(r.geometria);
+
+        const feature = {
+          type: "Feature",
+          geometry: geom,
+          properties: { ...r }
         };
 
-        // Insert layers
-        geoLayer.addTo(map);
-        clusterLayer.addTo(map);
+        geoLayer.addData(feature);
+        drawn++;
 
-        // =========================
-        // Networking (AbortController + timeout)
-        // =========================
-        let inFlightController = null;
-        let lastDataFingerprint = null;
+        const center = bestBalizaPosition(geom);
+        if (!center) continue;
 
-        function withTimeoutController(ms) {
-            const controller = new AbortController();
-            const t = setTimeout(() => controller.abort(), ms);
-            return { controller, cancelTimeout: () => clearTimeout(t) };
-        } // AbortController cancels fetch 
-
-        function scheduleNextTick() {
-            if (refreshTimer) clearTimeout(refreshTimer);
-            refreshTimer = setTimeout(() => updateData(false), currentInterval);
+        if (isCarIncident(r)) {
+          const id = r.id ?? null;
+          if (id != null) {
+            activeBeaconIds.add(String(id));
+            beaconCache.set(String(id), { record: { ...r }, center, lastSeenMs: nowMs });
+          }
+          addBalizaMarkerAt(center, r, "activa");
+          balizasActivas++;
+        } else {
+          // AQUÍ: icono por subcausa
+          addSubcauseMarkerAt(center, r);
         }
+      } catch (e) {
+        console.warn("Geometría inválida", r?.id, e);
+      }
+    }
 
-        function setBackoff(onError) {
-            // 60s normal, en error sube hasta 5 min
-            currentInterval = onError ? Math.min(currentInterval * 2, 300000) : REFRESH_MS;
+    // 2) Purga + render de recientes desde cache (si habilitado)
+    purgeExpiredBeacons(nowMs);
+
+    if (state.showRecent) {
+      for (const [id, v] of beaconCache.entries()) {
+        if (!activeBeaconIds.has(id)) {
+          addBalizaMarkerAt(v.center, v.record, "reciente");
+          balizasRecientes++;
         }
-
-
-        async function fetchTrafficSafe() {
-            // Cancel previous request if still running
-            if (inFlightController) inFlightController.abort();
-
-            const { controller, cancelTimeout } = withTimeoutController(FETCH_TIMEOUT_MS);
-            inFlightController = controller;
-
-            try {
-                const r = await fetch(`${API_BASE}/api/traffic`, { method: "GET", signal: controller.signal, cache: "no-store" });
-                if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                return await r.json();
-            } finally {
-                cancelTimeout();
-                inFlightController = null;
-            }
-        }
-
-        // =========================
-        // UI Helpers
-        // =========================
-        function setHealthBadge(type, text) {
-            const el = document.getElementById("health");
-            el.textContent = text;
-            el.className = "badge " + type;
-        }
-
-        function popupHtml(r) {
-            return `
-        <b>Incidencia</b><br>
-        ID: ${r.id ?? "N/D"}<br>
-        Carretera: ${r.carretera ?? "N/D"}<br>
-        Provincia: ${r.provinciaIni ?? "N/D"} - ${r.provinciaFin ?? "N/D"}<br>
-        Causa: ${r.causa ?? "N/D"}<br>
-        Subcausa: ${r.subcausa ?? "N/D"}<br>
-        Inicio: ${r.fechaInicio ? new Date(r.fechaInicio).toLocaleString("es-ES") : "N/D"}
-      `;
-        }
-
-        function normalize(v) {
-            return (v ?? "").toString().trim();
-        }
-
-        function fingerprintRecords(records) {
-            // Fingerprint barato: length + concat de ids + fechaInicio máx
-            // (suficiente para evitar redibujos cuando la respuesta es igual)
-            let maxDate = "";
-            let ids = "";
-            const n = records.length;
-            for (let i = 0; i < n; i++) {
-                const r = records[i] || {};
-                ids += (r.id || "") + "|";
-                const fi = r.fechaInicio || "";
-                if (fi > maxDate) maxDate = fi;
-            }
-            return `${n}:${maxDate}:${ids.length}:${ids.slice(0, 200)}`;
-        }
-
-        // Centro aproximado (para icono baliza)
-        function flattenLineCoords(geom) {
-            // Devuelve array de puntos en orden como [ [lon,lat], ... ] para LineString/MultiLineString
-            if (!geom) return [];
-            if (geom.type === "LineString") return geom.coordinates || [];
-            if (geom.type === "MultiLineString") return (geom.coordinates || []).flat();
-            return [];
-        }
-
-        // Distancia aproximada en metros entre dos [lon,lat] usando L.latLng().distanceTo()
-        function segMeters(a, b) {
-            const A = L.latLng(a[1], a[0]);
-            const B = L.latLng(b[1], b[0]);
-            return A.distanceTo(B);
-        }
-
-        // Punto medio "real" a lo largo de la polilínea (por distancia acumulada)
-        function midpointAlongLine(geom) {
-            const pts = flattenLineCoords(geom);
-            if (pts.length === 0) return null;
-            if (pts.length === 1) return [pts[0][1], pts[0][0]];
-
-            // Total
-            let total = 0;
-            for (let i = 0; i < pts.length - 1; i++) total += segMeters(pts[i], pts[i + 1]);
-            if (total === 0) return [pts[0][1], pts[0][0]];
-
-            const half = total / 2;
-            let acc = 0;
-
-            for (let i = 0; i < pts.length - 1; i++) {
-                const a = pts[i], b = pts[i + 1];
-                const d = segMeters(a, b);
-                if (acc + d >= half) {
-                    const t = (half - acc) / d; // 0..1
-                    const lon = a[0] + (b[0] - a[0]) * t;
-                    const lat = a[1] + (b[1] - a[1]) * t;
-                    return [lat, lon];
-                }
-                acc += d;
-            }
-            const last = pts[pts.length - 1];
-            return [last[1], last[0]];
-        }
-
-        // Centro “fallback” para Polygon/MultiPolygon/Point (por promedio rápido)
-        function fallbackCenter(geom) {
-            if (!geom || !geom.type || !geom.coordinates) return null;
-
-            let points = [];
-            if (geom.type === "Point") points = [geom.coordinates];
-            else if (geom.type === "MultiPoint") points = geom.coordinates;
-            else if (geom.type === "Polygon") points = geom.coordinates?.[0] || [];
-            else if (geom.type === "MultiPolygon") points = geom.coordinates?.[0]?.[0] || [];
-
-            if (!points.length) return null;
-
-            let sumLon = 0, sumLat = 0;
-            for (const p of points) { sumLon += p[0]; sumLat += p[1]; }
-            return [sumLat / points.length, sumLon / points.length];
-        }
-
-        function bestBalizaPosition(geom) {
-            // Para líneas: midpoint por distancia; para lo demás: fallback
-            if (geom?.type === "LineString" || geom?.type === "MultiLineString") return midpointAlongLine(geom);
-            return fallbackCenter(geom);
-        }
-
-
-        function buildSelectOptions(selectEl, values, allLabel) {
-            selectEl.innerHTML = "";
-            const optAll = document.createElement("option");
-            optAll.value = "__ALL__";
-            optAll.textContent = allLabel;
-            selectEl.appendChild(optAll);
-
-            values.sort((a, b) => a.localeCompare(b, "es")).forEach(v => {
-                const o = document.createElement("option");
-                o.value = v;
-                o.textContent = v;
-                selectEl.appendChild(o);
-            });
-        }
-
-        function applyLayerVisibility() {
-            // líneas
-            if (state.showLineas) {
-                if (!map.hasLayer(geoLayer)) geoLayer.addTo(map);
-            } else {
-                if (map.hasLayer(geoLayer)) map.removeLayer(geoLayer);
-            }
-
-            // balizas (cluster vs normal)
-            const desired = state.useCluster ? clusterLayer : plainMarkerLayer;
-
-            // remove both first
-            if (map.hasLayer(clusterLayer)) map.removeLayer(clusterLayer);
-            if (map.hasLayer(plainMarkerLayer)) map.removeLayer(plainMarkerLayer);
-
-            if (state.showBalizas) desired.addTo(map);
-        }
-
-        function filtered(records) {
-            const causaSel = state.causa;
-            const subSel = state.subcausa;
-
-            return records.filter(r => {
-                if (!r) return false;
-                const c = normalize(r.causa);
-                const s = normalize(r.subcausa);
-                if (causaSel !== "__ALL__" && c !== causaSel) return false;
-                if (subSel !== "__ALL__" && s !== subSel) return false;
-                return true;
-            });
-        }
-
-        // =========================
-        // Render
-        // =========================
-        function clearDataLayers() {
-            geoLayer.clearLayers();
-            clusterLayer.clearLayers();
-            plainMarkerLayer.clearLayers();
-        }
-
-        function addBalizaMarker(latlng, props) {
-            const m = L.marker(latlng, { icon: balizaIcon }).bindPopup(popupHtml(props));
-            if (state.useCluster) clusterLayer.addLayer(m);
-            else plainMarkerLayer.addLayer(m);
-        }
-
-        function updateMap(records) {
-            clearDataLayers();
-
-            let drawn = 0;
-            let balizas = 0;
-
-            for (const r of records) {
-                if (!r || !r.geometria) continue;
-
-                try {
-                    const geom = JSON.parse(r.geometria);
-
-                    const feature = {
-                        type: "Feature",
-                        geometry: geom,
-                        properties: { ...r }
-                    };
-
-                    geoLayer.addData(feature);
-                    drawn++;
-
-                    const center = bestBalizaPosition(geom);
-
-                    if (center) {
-                        addBalizaMarker(center, r);
-                        balizas++;
-                    }
-                } catch (e) {
-                    // silenciar en producción si molesta
-                    console.warn("Geometría inválida", r?.id, e);
-                }
-            }
-
-            // Auto-zoom
-            if (state.autoZoom) {
-                // Si hay líneas, fit a ellas; si no, a balizas
-                if (geoLayer.getLayers().length > 0) map.fitBounds(geoLayer.getBounds().pad(0.1));
-                else if (state.useCluster ? clusterLayer.getLayers().length > 0 : plainMarkerLayer.getLayers().length > 0) {
-                    const layer = state.useCluster ? clusterLayer : plainMarkerLayer;
-                    map.fitBounds(layer.getBounds().pad(0.1));
-                }
-            }
-
-            applyLayerVisibility();
-
-            return { drawn, balizas };
-        }
-
-        // =========================
-        // Main update loop
-        // =========================
-        let latestRawRecords = [];
-
-        async function updateData(forceRedraw = false) {
-            try {
-                setHealthBadge("warn", "Actualizando…");
-
-                const data = await fetchTrafficSafe();
-                const records = Array.isArray(data.situationsRecords) ? data.situationsRecords : [];
-                latestRawRecords = records;
-
-                // Populate filters from raw data
-                const causes = new Set();
-                const subcauses = new Set();
-                for (const r of records) {
-                    if (!r) continue;
-                    const c = normalize(r.causa);
-                    const s = normalize(r.subcausa);
-                    if (c) causes.add(c);
-                    if (s) subcauses.add(s);
-                }
-
-                const causaSelect = document.getElementById("causaSelect");
-                const subSelect = document.getElementById("subcausaSelect");
-
-                // Solo reconstruye opciones si cambió el set (simple: longitud)
-                if (causaSelect.options.length !== causes.size + 1) buildSelectOptions(causaSelect, [...causes], "Todas las causas");
-                if (subSelect.options.length !== subcauses.size + 1) buildSelectOptions(subSelect, [...subcauses], "Todas las subcausas");
-
-                // Mantener selección si existía
-                causaSelect.value = state.causa;
-                subSelect.value = state.subcausa;
-
-                // diff: si la data no cambió y no hay fuerza, no redibuja
-                const fp = fingerprintRecords(records);
-                if (!forceRedraw && fp === lastDataFingerprint) {
-                    document.getElementById("count").textContent = `${records.length} incidencias | sin cambios`;
-                    document.getElementById("lastUpdate").textContent = new Date().toLocaleString("es-ES");
-                    setHealthBadge("ok", "OK");
-
-                    // Polling robusto: siguiente tick (sin backoff)
-                    setBackoff(false);
-                    scheduleNextTick();
-                    return;
-                }
-                lastDataFingerprint = fp;
-
-                const recs = filtered(records);
-                const { drawn, balizas } = updateMap(recs);
-
-                document.getElementById("count").textContent =
-                    `${records.length} incidencias (total) | mostrando: ${recs.length} | líneas: ${drawn} | balizas: ${balizas}`;
-
-                document.getElementById("lastUpdate").textContent = new Date().toLocaleString("es-ES");
-                setHealthBadge("ok", "OK");
-
-                // OK => vuelve al intervalo normal
-                setBackoff(false);
-                scheduleNextTick();
-            } catch (e) {
-                if (e?.name === "AbortError") {
-                    // abort esperado (solapamiento o timeout)
-                    setHealthBadge("warn", "Cancelado/timeout");
-                } else {
-                    setHealthBadge("err", "Error");
-                }
-
-                document.getElementById("count").textContent = `Error: ${e.message ?? e}`;
-                document.getElementById("lastUpdate").textContent = new Date().toLocaleString("es-ES");
-
-                // Error => backoff y reintento más tarde
-                setBackoff(true);
-                scheduleNextTick();
-            }
-        }
-
-        // =========================
-        // Wire UI events
-        // =========================
-        document.getElementById("btnRefresh").addEventListener("click", () => updateData(true));
-
-        document.getElementById("btnResetFilters").addEventListener("click", () => {
-            state.causa = "__ALL__";
-            state.subcausa = "__ALL__";
-            document.getElementById("causaSelect").value = "__ALL__";
-            document.getElementById("subcausaSelect").value = "__ALL__";
-            updateData(true);
-        });
-
-        document.getElementById("causaSelect").addEventListener("change", (e) => {
-            state.causa = e.target.value;
-            updateData(true);
-        });
-
-        document.getElementById("subcausaSelect").addEventListener("change", (e) => {
-            state.subcausa = e.target.value;
-            updateData(true);
-        });
-
-        document.getElementById("toggleBalizas").addEventListener("change", (e) => {
-            state.showBalizas = e.target.checked;
-            applyLayerVisibility();
-        });
-
-        document.getElementById("toggleLineas").addEventListener("change", (e) => {
-            state.showLineas = e.target.checked;
-            applyLayerVisibility();
-        });
-
-        document.getElementById("toggleAutoZoom").addEventListener("change", (e) => {
-            state.autoZoom = e.target.checked;
-        });
-
-        document.getElementById("toggleCluster").addEventListener("change", (e) => {
-            state.useCluster = e.target.checked;
-            // re-render con el modo nuevo sin volver a pedir a la API
-            const recs = filtered(latestRawRecords);
-            updateMap(recs);
-        });
-
-        // =========================
-        // Start loop
-        // =========================
-        setInterval(() => updateData(false), REFRESH_MS);
-        updateData(true);
-    </script>
+      }
+    }
+
+    // Auto-zoom
+    if (state.autoZoom) {
+      if (geoLayer.getLayers().length > 0) map.fitBounds(geoLayer.getBounds().pad(0.1));
+      else {
+        const a = state.useCluster ? clusterActiveLayer : plainActiveLayer;
+        const r = state.useCluster ? clusterRecentLayer : plainRecentLayer;
+
+        if (a.getLayers().length > 0) map.fitBounds(a.getBounds().pad(0.1));
+        else if (r.getLayers().length > 0) map.fitBounds(r.getBounds().pad(0.1));
+        else if (otherPointsLayer.getLayers().length > 0) map.fitBounds(otherPointsLayer.getBounds().pad(0.1));
+      }
+    }
+
+    applyLayerVisibility();
+    return { drawn, balizasActivas, balizasRecientes };
+  }
+
+  // =========================
+  // Main update loop
+  // =========================
+  let latestRawRecords = [];
+
+  async function updateData(forceRedraw = false) {
+    try {
+      setHealthBadge("warn", "Actualizando…");
+
+      const data = await fetchTrafficSafe();
+      const records = Array.isArray(data.situationsRecords) ? data.situationsRecords : [];
+      latestRawRecords = records;
+
+      const causes = new Set();
+      const subcauses = new Set();
+      for (const r of records) {
+        if (!r) continue;
+        const c = normalize(r.causa);
+        const s = normalize(r.subcausa);
+        if (c) causes.add(c);
+        if (s) subcauses.add(s);
+      }
+
+      const causaSelect = document.getElementById("causaSelect");
+      const subSelect = document.getElementById("subcausaSelect");
+
+      if (causaSelect.options.length !== causes.size + 1) buildSelectOptions(causaSelect, [...causes], "Todas las causas");
+      if (subSelect.options.length !== subcauses.size + 1) buildSelectOptions(subSelect, [...subcauses], "Todas las subcausas");
+
+      causaSelect.value = state.causa;
+      subSelect.value = state.subcausa;
+
+      const fp = fingerprintRecords(records);
+      if (!forceRedraw && fp === lastDataFingerprint) {
+        document.getElementById("count").textContent = `${records.length} incidencias | sin cambios`;
+        document.getElementById("lastUpdate").textContent = new Date().toLocaleString("es-ES");
+        setHealthBadge("ok", "OK");
+        setBackoff(false);
+        scheduleNextTick();
+        return;
+      }
+      lastDataFingerprint = fp;
+
+      const nowMs = Date.now();
+      const recs = filtered(records);
+      const { drawn, balizasActivas, balizasRecientes } = updateMap(recs, nowMs);
+
+      document.getElementById("count").textContent =
+        `${records.length} incidencias (total) | mostrando: ${recs.length} | líneas: ${drawn} | balizas activas: ${balizasActivas} | recientes: ${balizasRecientes}`;
+
+      document.getElementById("lastUpdate").textContent = new Date().toLocaleString("es-ES");
+      setHealthBadge("ok", "OK");
+
+      setBackoff(false);
+      scheduleNextTick();
+    } catch (e) {
+      if (e?.name === "AbortError") setHealthBadge("warn", "Cancelado/timeout");
+      else setHealthBadge("err", "Error");
+
+      document.getElementById("count").textContent = `Error: ${e.message ?? e}`;
+      document.getElementById("lastUpdate").textContent = new Date().toLocaleString("es-ES");
+
+      setBackoff(true);
+      scheduleNextTick();
+    }
+  }
+
+  // =========================
+  // Wire UI events
+  // =========================
+  document.getElementById("btnRefresh").addEventListener("click", () => updateData(true));
+
+  document.getElementById("btnResetFilters").addEventListener("click", () => {
+    state.causa = "__ALL__";
+    state.subcausa = "__ALL__";
+    document.getElementById("causaSelect").value = "__ALL__";
+    document.getElementById("subcausaSelect").value = "__ALL__";
+    updateData(true);
+  });
+
+  document.getElementById("causaSelect").addEventListener("change", (e) => {
+    state.causa = e.target.value;
+    updateData(true);
+  });
+
+  document.getElementById("subcausaSelect").addEventListener("change", (e) => {
+    state.subcausa = e.target.value;
+    updateData(true);
+  });
+
+  document.getElementById("toggleBalizas").addEventListener("change", (e) => {
+    state.showBalizas = e.target.checked;
+    applyLayerVisibility();
+  });
+
+  document.getElementById("toggleLineas").addEventListener("change", (e) => {
+    state.showLineas = e.target.checked;
+    applyLayerVisibility();
+  });
+
+  document.getElementById("toggleAutoZoom").addEventListener("change", (e) => {
+    state.autoZoom = e.target.checked;
+  });
+
+  document.getElementById("toggleCluster").addEventListener("change", (e) => {
+    state.useCluster = e.target.checked;
+    const recs = filtered(latestRawRecords);
+    updateMap(recs, Date.now());
+  });
+
+  // =========================
+  // Start loop (robusto)
+  // =========================
+  updateData(true).finally(scheduleNextTick);
+  </script>
 </body>
-
 </html>
